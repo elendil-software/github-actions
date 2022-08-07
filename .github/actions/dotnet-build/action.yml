@@ -1,0 +1,21 @@
+name: ".NET Build"
+description: "Build a .NET solution and execute tests"
+inputs:
+  configuration:
+    required: true
+    description: "value to pass to the dotnet configuration argument"
+    default: "Release"
+runs:
+  using: "composite"
+  steps:
+    - name: Restore
+      run: dotnet restore
+      shell: bash
+    
+    - name: Build
+      run: dotnet build --configuration ${{ inputs.configuration }} --no-incremental --no-restore
+      shell: bash
+        
+    - name: Test
+      run: dotnet test --configuration ${{ inputs.configuration }} --no-restore --verbosity normal
+      shell: bash

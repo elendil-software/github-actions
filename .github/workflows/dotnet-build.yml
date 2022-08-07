@@ -1,0 +1,29 @@
+name: '.NET Build'
+on:
+  workflow_call:
+    inputs:
+      configuration:
+        required: true
+        type: string
+        default: 'Release'
+      artifact-name:
+        required: true
+        type: string
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    steps:
+      - name: Download sources
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.artifact-name }}
+    
+      - name: Restore
+        run: dotnet restore
+    
+      - name: Build
+        run: dotnet build --configuration ${{ inputs.configuration }} --no-incremental --no-restore
+        
+      - name: Test
+        run: dotnet test --configuration ${{ inputs.configuration }} --no-restore --verbosity normal      
