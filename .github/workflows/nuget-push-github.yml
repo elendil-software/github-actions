@@ -1,0 +1,30 @@
+name: 'NuGet Push (GitHub)'
+on:
+  workflow_call:
+    inputs:
+      artifact_name_in:
+        description: 'Name of an artifact saved by a previous workflow'
+        default: 'workflow-share'
+        required: false
+        type: string
+        
+jobs:
+  nuget_push_github:
+    name: 'Push NuGet on GitHub'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download source artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.artifact_name_in }}
+
+      - name: Unzip artifact archive
+        run: |
+          7z x ${{ inputs.artifact_name_in }}.7z
+          rm -f ${{ inputs.artifact_name_in }}.7z
+
+      - name: Publish Nuget to GitHub registry
+        run: dotnet nuget push **/*.nupkg -k $GITHUB_TOKEN -s https://nuget.pkg.github.com/$OWNER/index.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
