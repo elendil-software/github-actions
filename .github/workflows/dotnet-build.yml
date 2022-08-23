@@ -7,6 +7,11 @@ on:
         default: 'Release'
         required: false
         type: string
+      add_github_nuget_source:
+        description: Add GitHub as a NuGet source
+        default: false
+        required: false
+        type: boolean  
       artifact_name_in:
         description: 'Name of an artifact saved by a previous workflow'
         default: 'workflow-share'
@@ -22,6 +27,9 @@ on:
         default: 5
         required: false
         type: number
+    secrets:
+      NUGET_GITHUB_TOKEN:
+        required: false
         
 jobs:
   build:
@@ -38,6 +46,15 @@ jobs:
           7z x ${{ inputs.artifact_name_in }}.7z
           rm -f ${{ inputs.artifact_name_in }}.7z
     
+      - name: Add GitHub NuGet Source
+        if: ${{ inputs.add_github_nuget_source == true }}
+        run: |
+          dotnet nuget add source --username $OWNER --password $NUGET_GITHUB_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/$OWNER/index.json"
+          dotnet nuget list source
+        env:
+          NUGET_GITHUB_TOKEN: ${{ secrets.NUGET_GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+
       - name: Restore
         run: dotnet restore
     
