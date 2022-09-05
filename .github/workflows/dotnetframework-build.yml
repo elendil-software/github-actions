@@ -1,0 +1,75 @@
+name: '.NET Build'
+on:
+  workflow_call:
+    inputs:
+      configuration:
+        description: 'Build configuration to send to dotnet tool' 
+        default: 'Release'
+        required: false
+        type: string
+      add_github_nuget_source:
+        description: Add GitHub as a NuGet source
+        default: false
+        required: false
+        type: boolean  
+      artifact_name_in:
+        description: 'Name of an artifact saved by a previous workflow'
+        default: 'workflow-share'
+        required: false
+        type: string
+      artifact_name_out:
+        description: 'Name of the artifact to save the result of this workflow'
+        default: 'workflow-share'
+        required: false
+        type: string
+      artifact_retention_days:
+        description: 'retention days for the artifact'
+        default: 5
+        required: false
+        type: number
+    secrets:
+      NUGET_GITHUB_TOKEN:
+        required: false
+        
+jobs:
+  build:
+    name: '.NET Framework Build'
+    runs-on: windows-latest
+    steps:
+      - name: Download source artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.artifact_name_in }}
+
+      - name: Unzip artifact archive
+        run: |
+          7z x ${{ inputs.artifact_name_in }}.7z
+          rm -Force ${{ inputs.artifact_name_in }}.7z
+    
+      - name: Add GitHub NuGet Source
+        if: ${{ inputs.add_github_nuget_source == true }}
+        run: |
+          dotnet nuget add source --username ${env:OWNER} --password ${env:NUGET_GITHUB_TOKEN} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${env:OWNER}/index.json"
+          dotnet nuget list source
+        env:
+          NUGET_GITHUB_TOKEN: ${{ secrets.NUGET_GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Restore
+        run: nuget restore
+    
+      - name: Build
+        run: msbuild /p:Configuration=${{ inputs.configuration }} /p:RestorePackages=false
+        
+      - name: Zip artifact archive
+        run: 7z a ${{ inputs.artifact_name_out }}.7z
+
+      - name: Upload source artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.artifact_name_out }}
+          path: ${{ inputs.artifact_name_out }}.7z
+          retention-days: ${{ inputs.artifact_retention_days }}
