@@ -1,0 +1,81 @@
+name: 'Build Inno Setup Installer'
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version of the packed software'
+        required: true
+        type: string
+      iss_file_path:
+        description: 'Path to the ISS script file'
+        required: true
+        type: string
+
+      push_installer_artifact:
+        description: 'Push the generated installer in artifact'
+        default: false
+        required: false
+        type: boolean
+      installer_artifact_path:
+        description: 'If push_installer_artifact is true, path of files to push'
+        default: '**/*.exe'
+        required: false
+        type: string
+      installer_artifact_name:
+        description: 'If push_installer_artifact is true, name of the artifact'
+        default: 'Installer'
+        required: false
+        type: string
+      
+      artifact_name_in:
+        description: 'Name of an artifact saved by a previous workflow'
+        default: 'workflow-share'
+        required: false
+        type: string
+      artifact_name_out:
+        description: 'Name of the artifact to save the result of this workflow'
+        default: 'workflow-share'
+        required: false
+        type: string
+
+      artifacts_retention_days:
+        description: 'retention days for the artifacts'
+        default: 5
+        required: false
+        type: number
+        
+jobs:
+  build:
+    name: 'Build Inno Setup Installer'
+    runs-on: windows-latest
+    steps:
+      - name: Download source artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.artifact_name_in }}
+
+      - name: Unzip artifact archive
+        run: |
+          7z x ${{ inputs.artifact_name_in }}.7z
+          rm -Force ${{ inputs.artifact_name_in }}.7z
+        
+      - name: 'Build Inno Setup Package'
+        run: ISCC /Dversion=${{ inputs.version }} /DVersionInfoVersion=${{ inputs.version }} ${{ inputs.iss_file_path }}
+      
+      - name: 'Push built package'
+        if: ${{ inputs.push_installer_artifact == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.installer_artifact_name }}
+          path: ${{ inputs.installer_artifact_path }}
+          retention-days: ${{ inputs.artifacts_retention_days }}
+
+      - name: Zip artifact archive
+        run: 7z a ${{ inputs.artifact_name_out }}.7z
+
+      - name: Upload source artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.artifact_name_out }}
+          path: ${{ inputs.artifact_name_out }}.7z
+          retention-days: ${{ inputs.artifacts_retention_days }}
