@@ -130,7 +130,7 @@ jobs:
     
     steps:
       - name: Download source artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.0.1
         with:
           name: ${{ inputs.artifact_name_in }}
 
@@ -140,13 +140,13 @@ jobs:
           rm -f ${{ inputs.artifact_name_in }}.7z
     
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.13
+        uses: gittools/actions/gitversion/setup@v0.9.15
         with:
           versionSpec: '5.x'
           
       - name: Determine Version
         id:   gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.13
+        uses: gittools/actions/gitversion/execute@v0.9.15
         with:
           useConfigFile: true
           configFilePath: ${{ inputs.config }}
@@ -156,7 +156,7 @@ jobs:
         run: 7z a ${{ inputs.artifact_name_out }}.7z
 
       - name: Upload source artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: ${{ inputs.artifact_name_out }}
           path: ${{ inputs.artifact_name_out }}.7z

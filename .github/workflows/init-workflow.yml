@@ -27,7 +27,7 @@ jobs:
       run: 7z a ${{ inputs.artifact_name_out }}.7z
 
     - name: Upload source directory
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: ${{ inputs.artifact_name_out }}
         path: ${{ inputs.artifact_name_out }}.7z

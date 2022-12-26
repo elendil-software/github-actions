@@ -50,7 +50,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Download source artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.0.1
         with:
           name: ${{ inputs.artifact_name_in }}
 
@@ -64,7 +64,7 @@ jobs:
       
       - name: 'Push built package'
         if: ${{ inputs.push_installer_artifact == true }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: ${{ inputs.installer_artifact_name }}
           path: ${{ inputs.installer_artifact_path }}
@@ -74,7 +74,7 @@ jobs:
         run: 7z a ${{ inputs.artifact_name_out }}.7z
 
       - name: Upload source artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: ${{ inputs.artifact_name_out }}
           path: ${{ inputs.artifact_name_out }}.7z

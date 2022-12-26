@@ -130,7 +130,7 @@ jobs:
     
     steps:
       - name: Download source artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.0.1
         with:
           name: ${{ inputs.artifact_name_in }}
 
@@ -159,7 +159,7 @@ jobs:
         run: 7z a ${{ inputs.artifact_name_out }}.7z
 
       - name: Upload source artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: ${{ inputs.artifact_name_out }}
           path: ${{ inputs.artifact_name_out }}.7z

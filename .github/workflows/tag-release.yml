@@ -30,14 +30,14 @@ on:
     secrets:
       SSH_PRIVATE_KEY:
         required: true
-        
+
 jobs:
   release:
     name: 'Create Tag and Release'
     runs-on: ubuntu-latest
     steps:
       - name: Download source artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.0.1
         with:
           name: ${{ inputs.artifact_name_in }}
 
@@ -46,7 +46,7 @@ jobs:
           7z x ${{ inputs.artifact_name_in }}.7z
           rm -f ${{ inputs.artifact_name_in }}.7z
                     
-      - uses: webfactory/ssh-agent@v0.5.4
+      - uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}    
     
@@ -65,7 +65,7 @@ jobs:
 
       - name: Build Changelog
         id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@v3.3.0
+        uses: mikepenz/release-changelog-builder-action@v3.5.0
         with:
           failOnError: true
           configuration: "${{ inputs.changelog_builder_configuration }}"
@@ -73,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        uses: ncipollo/release-action@v1.10.0
+        uses: ncipollo/release-action@v1.12.0
         with:
           artifactErrorsFailBuild: true
           draft: true
