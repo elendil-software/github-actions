@@ -152,8 +152,8 @@ jobs:
           configFilePath: ${{ inputs.config }}
           additionalArguments: '/updateassemblyinfo'
           
-      - name: Update *.csproj
-        run: Get-ChildItem -Recurse -Include *.csproj | ForEach-Object {	Write-Host $_; [xml]$xml = Get-Content $_; $xml.Project.PropertyGroup[0].PackageVersion = "${{ steps.gitversion.outputs.NuGetVersionV2 }}"; $xml.Save($_); }
+      - name: Update Package Version in *.csproj
+        run: Get-ChildItem -Recurse -Include *.csproj | ForEach-Object {	Write-Host $_; [xml]$xml = Get-Content $_; if ($xml.Project.PropertyGroup[0].PackageVersion -ne $null) { $xml.Project.PropertyGroup[0].PackageVersion = "${{ steps.gitversion.outputs.NuGetVersionV2 }}"; $xml.Save($_); }}
         
       - name: Zip artifact archive
         run: 7z a ${{ inputs.artifact_name_out }}.7z
